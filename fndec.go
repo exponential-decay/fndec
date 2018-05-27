@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-const version = "fndec-0.0.2"
+const version = "fndec-0.0.3"
 
 var (
 	file string
@@ -20,9 +20,31 @@ func init() {
 	flag.BoolVar(&vers, "version", false, "Return version information.")
 }
 
+// Crimped from, https://github.com/richardlehane/siegfried/blob/a3cf617aaec3206f894ac488ae2c5ce1ac2f4230/cmd/sf/sf.go#L82-L101
+func ftype(mode os.FileMode) string {
+	typ := "unknown"
+	switch {
+	case mode&os.ModeType == 0:
+		typ = "regular file"
+	case mode&os.ModeDir == os.ModeDir:
+		typ = "directory"
+	case mode&os.ModeSymlink == os.ModeSymlink:
+		typ = "symlink"
+	case mode&os.ModeNamedPipe == os.ModeNamedPipe:
+		typ = "named pipe"
+	case mode&os.ModeSocket == os.ModeSocket:
+		typ = "socket"
+	case mode&os.ModeDevice == os.ModeDevice:
+		typ = "device"
+	}
+	return typ
+}
+
 func readFileName(path string, fi os.FileInfo, err error) error {
-	fmt.Printf("Character encoding for fname: '%s' detected: %s\n",
-		filepath.Base(path), char.Detect([]byte(filepath.Base(path))))
+	fmt.Printf("Character encoding for '%s' name: '%s' detected: %s\n",
+		ftype(fi.Mode()),
+		filepath.Base(path),
+		char.Detect([]byte(filepath.Base(path))))
 	return nil
 }
 
